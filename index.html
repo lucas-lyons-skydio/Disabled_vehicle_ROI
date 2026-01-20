@@ -1,459 +1,208 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Drone Response ROI Calculator</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; background: #f5f7fa; padding: 20px; color: #2d3748; }
-        .container { max-width: 1400px; margin: 0 auto; background: white; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); overflow: hidden; }
-        .header { background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%); color: white; padding: 30px; }
-        .header h1 { font-size: 28px; margin-bottom: 8px; }
-        .header p { opacity: 0.9; font-size: 14px; }
-        .tabs { display: flex; border-bottom: 1px solid #e2e8f0; background: #f8fafc; }
-        .tab { padding: 16px 24px; cursor: pointer; border: none; background: none; font-size: 15px; font-weight: 500; color: #64748b; border-bottom: 2px solid transparent; transition: all 0.2s; }
-        .tab:hover { color: #2563eb; background: #f1f5f9; }
-        .tab.active { color: #2563eb; border-bottom-color: #2563eb; background: white; }
-        .tab-content { display: none; padding: 30px; }
-        .tab-content.active { display: block; }
-        .input-section { margin-bottom: 32px; padding-bottom: 24px; border-bottom: 1px solid #e2e8f0; }
-        .section-title { font-size: 18px; font-weight: 600; color: #1e40af; margin-bottom: 20px; }
-        .input-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
-        .input-field { display: flex; flex-direction: column; }
-        .input-field label { font-size: 14px; font-weight: 500; color: #374151; margin-bottom: 6px; }
-        .input-wrapper { display: flex; align-items: center; gap: 8px; }
-        .input-field input { flex: 1; padding: 10px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px; }
-        .input-field input:focus { outline: none; border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1); }
-        .unit { font-size: 13px; color: #6b7280; min-width: 80px; }
-        .results-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-bottom: 24px; }
-        .result-card { background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 20px; }
-        .result-card h3 { font-size: 16px; font-weight: 600; color: #1f2937; margin-bottom: 16px; }
-        .result-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #f3f4f6; }
-        .result-row:last-child { border-bottom: none; }
-        .result-label { font-size: 14px; color: #6b7280; }
-        .result-value { font-weight: 600; color: #1f2937; }
-        .summary-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 30px; padding: 24px; background: linear-gradient(135deg, #f0fdf4 0%, #dbeafe 100%); border-radius: 8px; }
-        .summary-card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        .summary-label { font-size: 13px; color: #6b7280; margin-bottom: 8px; }
-        .summary-value { font-size: 32px; font-weight: 700; }
-        .positive { color: #059669; }
-        .negative { color: #dc2626; }
-        .neutral { color: #2563eb; }
-        .alert { background: #dbeafe; border-left: 4px solid #2563eb; padding: 16px; border-radius: 6px; margin-top: 20px; }
-        .alert h4 { font-size: 15px; font-weight: 600; color: #1e40af; margin-bottom: 8px; }
-        .alert ul { list-style: none; font-size: 14px; color: #1e3a8a; }
-        .alert li { margin: 6px 0; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        thead { background: #f8fafc; }
-        th { text-align: left; padding: 12px; font-size: 12px; font-weight: 600; color: #64748b; text-transform: uppercase; border-bottom: 2px solid #e2e8f0; }
-        td { padding: 12px; font-size: 14px; border-bottom: 1px solid #f1f5f9; }
-        .category-row { background: #f0f9ff; font-weight: 600; }
-        .methodology-section { margin-bottom: 30px; }
-        .methodology-section h3 { font-size: 18px; font-weight: 600; color: #1e40af; margin-bottom: 12px; }
-        .methodology-section p { font-size: 14px; line-height: 1.6; color: #4b5563; margin-bottom: 12px; }
-        .methodology-section ul { font-size: 14px; line-height: 1.6; color: #4b5563; margin-bottom: 12px; padding-left: 20px; }
-        .formula { background: #f8fafc; padding: 16px; border-radius: 6px; font-family: 'Courier New', monospace; font-size: 13px; margin: 12px 0; overflow-x: auto; white-space: pre; }
-    </style>
-</head>
-<body>
-    <script> /* Tab switching */ function switchTab(id, evt){ if(evt && evt.preventDefault) evt.preventDefault(); // update active tab button document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active')); if(evt && evt.currentTarget) evt.currentTarget.classList.add('active'); // show/hide content document.querySelectorAll('.tab-content').forEach(c=>c.classList.remove('active')); const el = document.getElementById(id); if(el) el.classList.add('active'); } /* Minimal calculation to populate Results fields (replace with your full model as needed) */ function calculate(){ try{ // Read inputs (use Number(...) with defaults) const ADT = Number(document.getElementById('adt')?.value || 0); const lanesTotal = Math.max(1, Number(document.getElementById('lanesTotal')?.value || 1)); const truckPercent = Number(document.getElementById('truckPercent')?.value || 0) / 100; const avgOccupancy = Number(document.getElementById('avgOccupancy')?.value || 1.0); const annualIncidents = Number(document.getElementById('annualIncidents')?.value || 0); const avgLanesBlocked = Math.max(0.0001, Number(document.getElementById('avgLanesBlocked')?.value || 1)); const baselineClearanceMin = Number(document.getElementById('baselineClearanceMin')?.value || 0); const timeSavedMin = Number(document.getElementById('timeSavedMin')?.value || 0); const votPassenger = Number(document.getElementById('votPassenger')?.value || 0); const votCommercial = Number(document.getElementById('votCommercial')?.value || 0); const effectivenessMultiplier = Math.max(0, Math.min(1, Number(document.getElementById('effectivenessMultiplier')?.value || 1))); const droneEquipmentCost = Number(document.getElementById('droneEquipmentCost')?.value || 0); const dronePersonnelCost = Number(document.getElementById('dronePersonnelCost')?.value || 0); const droneTrainingOverhead = Number(document.getElementById('droneTrainingOverhead')?.value || 0); // Estimate vehicles affected per hour during an incident: // ADT / 24 (vehicles/hour on average) scaled by lanes blocked fraction const vehiclesPerHour = (ADT / 24) * (avgLanesBlocked / lanesTotal); const passengerVehiclesPerHour = vehiclesPerHour * (1 - truckPercent); const commercialVehiclesPerHour = vehiclesPerHour * truckPercent; // Effective time saved by drones const effectiveTimeSavedMin = timeSavedMin * effectivenessMultiplier; const effectiveTimeSavedHr = effectiveTimeSavedMin / 60; // Per-incident delay cost estimate const passengerDelay = passengerVehiclesPerHour * avgOccupancy * votPassenger * effectiveTimeSavedHr; const commercialDelay = commercialVehiclesPerHour * votCommercial * effectiveTimeSavedHr; const totalDelayPerIncident = passengerDelay + commercialDelay; // Secondary crash savings (simple expected value) const secondaryCrashProb = Number(document.getElementById('secondaryCrashProb')?.value || 0); const avgSecondaryCost = Number(document.getElementById('avgSecondaryCost')?.value || 0); const secondaryCostPerIncident = secondaryCrashProb * avgSecondaryCost * (effectiveTimeSavedMin / Math.max(1, baselineClearanceMin)); const annualSavings = (totalDelayPerIncident + secondaryCostPerIncident) * annualIncidents; const annualDroneCosts = droneEquipmentCost + dronePersonnelCost + droneTrainingOverhead; const netAnnualBenefit = annualSavings - annualDroneCosts; const roi = annualDroneCosts === 0 ? (netAnnualBenefit > 0 ? Infinity : -Infinity) : (netAnnualBenefit / annualDroneCosts); const paybackYears = annualSavings > 0 ? (annualDroneCosts / annualSavings) : (netAnnualBenefit > 0 ? 0 : Infinity); // Update UI (formatted) function fmtMoney(v){ return (isFinite(v) ? ('$' + Number(v).toLocaleString(undefined, {maximumFractionDigits:0})) : '-'); } function fmtMoney2(v){ return (isFinite(v) ? ('$' + Number(v).toLocaleString(undefined, {maximumFractionDigits:2})) : '-'); } function fmtPercent(v){ return (isFinite(v) ? (Math.round(v*100) + '%') : '-'); } document.getElementById('passengerDelay').textContent = fmtMoney2(passengerDelay); document.getElementById('commercialDelay').textContent = fmtMoney2(commercialDelay); document.getElementById('totalDelay').textContent = fmtMoney2(totalDelayPerIncident); document.getElementById('secondaryCost').textContent = fmtMoney2(secondaryCostPerIncident); document.getElementById('responseCost').textContent = fmtMoney2(0); // placeholder document.getElementById('environmentalCost').textContent = fmtMoney2(0); // placeholder document.getElementById('costPerIncident').textContent = fmtMoney2(totalDelayPerIncident + secondaryCostPerIncident); document.getElementById('annualBaseline').textContent = fmtMoney(Math.round((totalDelayPerIncident + secondaryCostPerIncident) * annualIncidents)); document.getElementById('annualSavings').textContent = fmtMoney(Math.round(annualSavings)); document.getElementById('annualDroneCosts').textContent = fmtMoney(Math.round(annualDroneCosts)); document.getElementById('netBenefit').textContent = fmtMoney(Math.round(netAnnualBenefit)); document.getElementById('roiValue').textContent = isFinite(roi) ? (Math.round(roi*100) + '%') : (roi === Infinity ? '∞' : '-'); document.getElementById('netBenefitValue').textContent = fmtMoney(Math.round(netAnnualBenefit)); document.getElementById('paybackValue').textContent = isFinite(paybackYears) ? (paybackYears.toFixed(1) + ' years') : '-'; document.getElementById('laneClosureFactor').textContent = fmtPercent(avgLanesBlocked / lanesTotal); document.getElementById('vehiclesAffected').textContent = Math.round(vehiclesPerHour); document.getElementById('reductionFactor').textContent = fmtPercent(effectivenessMultiplier); document.getElementById('baselineCost').textContent = fmtMoney2(totalDelayPerIncident + secondaryCostPerIncident); document.getElementById('savingsPerIncident').textContent = fmtMoney2(totalDelayPerIncident + secondaryCostPerIncident); // approximation document.getElementById('costReduction').textContent = fmtPercent(effectivenessMultiplier); const breakEvenIncidents = annualDroneCosts === 0 ? 0 : Math.ceil(annualDroneCosts / Math.max(1, (totalDelayPerIncident + secondaryCostPerIncident))); document.getElementById('breakEvenIncidents').textContent = breakEvenIncidents; document.getElementById('annualIncidentsDisplay').textContent = annualIncidents; const margin = annualIncidents === 0 ? 0 : Math.max(0, ((annualIncidents - breakEvenIncidents) / Math.max(1, annualIncidents))); document.getElementById('marginSafety').textContent = fmtPercent(margin); }catch(e){ console.error('Calculation error', e); } } /* Initialize */ document.addEventListener('DOMContentLoaded', function(){ // Attach event listeners for tabs that were created without event reference (in some browsers evt.currentTarget may be undefined) document.querySelectorAll('.tab').forEach(btn=>{ btn.addEventListener('click', function(e){ // determine target id from button text or onclick attribute const onclick = btn.getAttribute('onclick'); if(onclick){ const m = onclick.match(/switchTab\\(['"]([^'"]+)['"]/); if(m) switchTab(m[1], {preventDefault:()=>{}, currentTarget:btn}); } }); }); // initial calculation calculate(); }); </script>
-    <div class="container">
-        <div class="header">
-            <h1>Disabled Vehicle Drone Response ROI Calculator</h1>
-            <p>Economic Analysis for Autonomous Incident Response on High-Volume Roadways</p>
-        </div>
-        
-        <div class="tabs">
-            <button class="tab active" onclick="switchTab('calculator', event)">Calculator</button>
-            <button class="tab" onclick="switchTab('results', event)">Results & Analysis</button>
-            <button class="tab" onclick="switchTab('dictionary', event)">Data Dictionary</button>
-            <button class="tab" onclick="switchTab('methodology', event)">Methodology</button>
-        </div>
-        
-        <div id="calculator" class="tab-content active">
-            <div class="input-section">
-                <h3 class="section-title">Roadway Characteristics</h3>
-                <div class="input-grid">
-                    <div class="input-field">
-                        <label>Average Daily Traffic (ADT)</label>
-                        <div class="input-wrapper">
-                            <input type="number" id="adt" value="100000" oninput="calculate()">
-                            <span class="unit">vehicles/day</span>
-                        </div>
-                    </div>
-                    <div class="input-field">
-                        <label>Total Number of Lanes</label>
-                        <div class="input-wrapper">
-                            <input type="number" id="lanesTotal" value="4" oninput="calculate()">
-                            <span class="unit">lanes</span>
-                        </div>
-                    </div>
-                    <div class="input-field">
-                        <label>Commercial Vehicle %</label>
-                        <div class="input-wrapper">
-                            <input type="number" id="truckPercent" value="15" oninput="calculate()">
-                            <span class="unit">%</span>
-                        </div>
-                    </div>
-                    <div class="input-field">
-                        <label>Average Vehicle Occupancy</label>
-                        <div class="input-wrapper">
-                            <input type="number" id="avgOccupancy" value="1.6" step="0.1" oninput="calculate()">
-                            <span class="unit">persons/vehicle</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="input-section">
-                <h3 class="section-title">Incident Data</h3>
-                <div class="input-grid">
-                    <div class="input-field">
-                        <label>Annual Incidents</label>
-                        <div class="input-wrapper">
-                            <input type="number" id="annualIncidents" value="500" oninput="calculate()">
-                            <span class="unit">incidents/year</span>
-                        </div>
-                    </div>
-                    <div class="input-field">
-                        <label>Average Lanes Blocked</label>
-                        <div class="input-wrapper">
-                            <input type="number" id="avgLanesBlocked" value="1" oninput="calculate()">
-                            <span class="unit">lanes</span>
-                        </div>
-                    </div>
-                    <div class="input-field">
-                        <label>Baseline Clearance Time</label>
-                        <div class="input-wrapper">
-                            <input type="number" id="baselineClearanceMin" value="35" oninput="calculate()">
-                            <span class="unit">minutes</span>
-                        </div>
-                    </div>
-                    <div class="input-field">
-                        <label>Time Saved with Drones</label>
-                        <div class="input-wrapper">
-                            <input type="number" id="timeSavedMin" value="12" oninput="calculate()">
-                            <span class="unit">minutes</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="input-section">
-                <h3 class="section-title">Economic Values</h3>
-                <div class="input-grid">
-                    <div class="input-field">
-                        <label>Value of Time - Passenger</label>
-                        <div class="input-wrapper">
-                            <input type="number" id="votPassenger" value="19.50" step="0.50" oninput="calculate()">
-                            <span class="unit">$/hour</span>
-                        </div>
-                    </div>
-                    <div class="input-field">
-                        <label>Value of Time - Commercial</label>
-                        <div class="input-wrapper">
-                            <input type="number" id="votCommercial" value="62" oninput="calculate()">
-                            <span class="unit">$/hour</span>
-                        </div>
-                    </div>
-                    <div class="input-field">
-                        <label>Secondary Crash Probability</label>
-                        <div class="input-wrapper">
-                            <input type="number" id="secondaryCrashProb" value="0.03" step="0.01" oninput="calculate()">
-                            <span class="unit">probability</span>
-                        </div>
-                    </div>
-                    <div class="input-field">
-                        <label>Avg Secondary Crash Cost</label>
-                        <div class="input-wrapper">
-                            <input type="number" id="avgSecondaryCost" value="125000" oninput="calculate()">
-                            <span class="unit">$</span>
-                        </div>
-                    </div>
-                    <div class="input-field">
-                        <label>Emission Cost per Vehicle-Hour</label>
-                        <div class="input-wrapper">
-                            <input type="number" id="emissionCostPerVehHr" value="0.85" step="0.05" oninput="calculate()">
-                            <span class="unit">$</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="input-section">
-                <h3 class="section-title">Response Costs</h3>
-                <div class="input-grid">
-                    <div class="input-field">
-                        <label>Baseline Detection Time</label>
-                        <div class="input-wrapper">
-                            <input type="number" id="baselineDetectionMin" value="8" oninput="calculate()">
-                            <span class="unit">minutes</span>
-                        </div>
-                    </div>
-                    <div class="input-field">
-                        <label>Baseline Verification Time</label>
-                        <div class="input-wrapper">
-                            <input type="number" id="baselineVerificationMin" value="5" oninput="calculate()">
-                            <span class="unit">minutes</span>
-                        </div>
-                    </div>
-                    <div class="input-field">
-                        <label>Baseline Dispatch Time</label>
-                        <div class="input-wrapper">
-                            <input type="number" id="baselineDispatchMin" value="7" oninput="calculate()">
-                            <span class="unit">minutes</span>
-                        </div>
-                    </div>
-                    <div class="input-field">
-                        <label>Response Hourly Cost</label>
-                        <div class="input-wrapper">
-                            <input type="number" id="responseHourlyCost" value="150" oninput="calculate()">
-                            <span class="unit">$/hour</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="input-section">
-                <h3 class="section-title">Drone Program Costs (Annual)</h3>
-                <div class="input-grid">
-                    <div class="input-field">
-                        <label>Equipment & Maintenance</label>
-                        <div class="input-wrapper">
-                            <input type="number" id="droneEquipmentCost" value="25000" oninput="calculate()">
-                            <span class="unit">$/year</span>
-                        </div>
-                    </div>
-                    <div class="input-field">
-                        <label>Personnel & Operations</label>
-                        <div class="input-wrapper">
-                            <input type="number" id="dronePersonnelCost" value="35000" oninput="calculate()">
-                            <span class="unit">$/year</span>
-                        </div>
-                    </div>
-                    <div class="input-field">
-                        <label>Training & Overhead</label>
-                        <div class="input-wrapper">
-                            <input type="number" id="droneTrainingOverhead" value="15000" oninput="calculate()">
-                            <span class="unit">$/year</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="input-section">
-                <h3 class="section-title">Effectiveness Parameters</h3>
-                <div class="input-grid">
-                    <div class="input-field">
-                        <label>Effectiveness Multiplier</label>
-                        <div class="input-wrapper">
-                            <input type="number" id="effectivenessMultiplier" value="0.5" step="0.1" oninput="calculate()">
-                            <span class="unit">factor (0-1)</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <div id="results" class="tab-content">
-            <h2 style="font-size: 24px; font-weight: 700; margin-bottom: 20px;">Executive Summary</h2>
-            <div class="summary-cards">
-                <div class="summary-card">
-                    <div class="summary-label">Return on Investment</div>
-                    <div class="summary-value" id="roiValue">-</div>
-                </div>
-                <div class="summary-card">
-                    <div class="summary-label">Net Annual Benefit</div>
-                    <div class="summary-value" id="netBenefitValue">-</div>
-                </div>
-                <div class="summary-card">
-                    <div class="summary-label">Payback Period</div>
-                    <div class="summary-value neutral" id="paybackValue">-</div>
-                </div>
-            </div>
-            
-            <div class="results-grid">
-                <div class="result-card">
-                    <h3>Cost Breakdown per Incident</h3>
-                    <div class="result-row">
-                        <span class="result-label">Passenger Vehicle Delay</span>
-                        <span class="result-value" id="passengerDelay">$0</span>
-                    </div>
-                    <div class="result-row">
-                        <span class="result-label">Commercial Vehicle Delay</span>
-                        <span class="result-value" id="commercialDelay">$0</span>
-                    </div>
-                    <div class="result-row">
-                        <span class="result-label">Total Delay Cost</span>
-                        <span class="result-value" id="totalDelay">$0</span>
-                    </div>
-                    <div class="result-row">
-                        <span class="result-label">Secondary Incident Cost</span>
-                        <span class="result-value" id="secondaryCost">$0</span>
-                    </div>
-                    <div class="result-row">
-                        <span class="result-label">Response Cost</span>
-                        <span class="result-value" id="responseCost">$0</span>
-                    </div>
-                    <div class="result-row">
-                        <span class="result-label">Environmental Cost</span>
-                        <span class="result-value" id="environmentalCost">$0</span>
-                    </div>
-                    <div class="result-row" style="background: #f0f9ff; padding: 12px; border-radius: 6px; margin-top: 8px;">
-                        <span class="result-label" style="font-weight: 700;">Total Cost per Incident</span>
-                        <span class="result-value" style="color: #2563eb;" id="costPerIncident">$0</span>
-                    </div>
-                </div>
-                
-                <div class="result-card">
-                    <h3>Annual Financial Analysis</h3>
-                    <div class="result-row">
-                        <span class="result-label">Annual Baseline Cost</span>
-                        <span class="result-value" style="color: #dc2626;" id="annualBaseline">$0</span>
-                    </div>
-                    <div class="result-row">
-                        <span class="result-label">Annual Savings from Drones</span>
-                        <span class="result-value" style="color: #059669;" id="annualSavings">$0</span>
-                    </div>
-                    <div class="result-row">
-                        <span class="result-label">Annual Drone Program Costs</span>
-                        <span class="result-value" style="color: #dc2626;" id="annualDroneCosts">$0</span>
-                    </div>
-                    <div class="result-row" style="background: #f0fdf4; padding: 12px; border-radius: 6px; margin-top: 8px;">
-                        <span class="result-label" style="font-weight: 700;">Net Annual Benefit</span>
-                        <span class="result-value" id="netBenefit">$0</span>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="results-grid">
-                <div class="result-card">
-                    <h3>Operational Metrics</h3>
-                    <div class="result-row">
-                        <span class="result-label">Lane Closure Factor</span>
-                        <span class="result-value" id="laneClosureFactor">0%</span>
-                    </div>
-                    <div class="result-row">
-                        <span class="result-label">Vehicles Affected/Hour</span>
-                        <span class="result-value" id="vehiclesAffected">0</span>
-                    </div>
-                    <div class="result-row">
-                        <span class="result-label">Reduction Factor</span>
-                        <span class="result-value" id="reductionFactor">0%</span>
-                    </div>
-                </div>
-                
-                <div class="result-card">
-                    <h3>Per Incident Impact</h3>
-                    <div class="result-row">
-                        <span class="result-label">Baseline Cost</span>
-                        <span class="result-value" id="baselineCost">$0</span>
-                    </div>
-                    <div class="result-row">
-                        <span class="result-label">Savings per Incident</span>
-                        <span class="result-value" style="color: #059669;" id="savingsPerIncident">$0</span>
-                    </div>
-                    <div class="result-row">
-                        <span class="result-label">Cost Reduction</span>
-                        <span class="result-value" id="costReduction">0%</span>
-                    </div>
-                </div>
-                
-                <div class="result-card">
-                    <h3>Break-Even Analysis</h3>
-                    <div class="result-row">
-                        <span class="result-label">Break-Even Incidents</span>
-                        <span class="result-value" id="breakEvenIncidents">0</span>
-                    </div>
-                    <div class="result-row">
-                        <span class="result-label">Annual Incidents</span>
-                        <span class="result-value" id="annualIncidentsDisplay">0</span>
-                    </div>
-                    <div class="result-row">
-                        <span class="result-label">Margin of Safety</span>
-                        <span class="result-value" id="marginSafety">0%</span>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="alert">
-                <h4>Interpretation Notes</h4>
-                <ul>
-                    <li>A positive ROI indicates the drone program generates more value than it costs</li>
-                    <li>Break-even incidents show the minimum number of incidents needed to justify the investment</li>
-                    <li>Consider sensitivity analysis by adjusting key variables like time saved and effectiveness multiplier</li>
-                    <li>These calculations exclude potential benefits like improved safety culture and reduced litigation risk</li>
-                </ul>
-            </div>
-        </div>
-        
-        <div id="dictionary" class="tab-content">
-            <h2 style="font-size: 24px; font-weight: 700; margin-bottom: 20px;">Data Dictionary</h2>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Variable</th>
-                        <th>Definition</th>
-                        <th>Units</th>
-                        <th>Typical Range</th>
-                        <th>Data Source</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr class="category-row">
-                        <td colspan="5">Roadway Characteristics</td>
-                    </tr>
-                    <tr>
-                        <td><strong>ADT</strong></td>
-                        <td>Average Daily Traffic - total vehicle count per day</td>
-                        <td>vehicles/day</td>
-                        <td>20,000 - 300,000</td>
-                        <td>State DOT traffic counts</td>
-                    </tr>
-                    <tr>
-                        <td><strong>Total Lanes</strong></td>
-                        <td>Number of through lanes in one direction</td>
-                        <td>lanes</td>
-                        <td>2 - 6</td>
-                        <td>Roadway design plans</td>
-                    </tr>
-                    <tr>
-                        <td><strong>Truck Percent</strong></td>
-                        <td>Percentage of commercial vehicles</td>
-                        <td>%</td>
-                        <td>10 - 25%</td>
-                        <td>Traffic classification studies</td>
-                    </tr>
-                    <tr class="category-row">
-                        <td colspan="5">Economic Values</td>
-                    </tr>
-                    <tr>
-                        <td><strong>VOT Passenger</strong></td>
-                        <td>Economic value of time for passengers</td>
-                        <td>$/hour</td>
-                        <td>$17 - $25</td>
-                        <td>USDOT guidance</td>
-                    </tr>
-                    <tr>
-                        <td><strong>VOT Commercial</strong></td>
-                        <td>Economic value of time for commercial vehicles</td>
-                        <td>$/hour</td>
-                        <td>$50 - $80</td>
-                        <td>ATRI operational costs</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-        
-        <div id="methodology" class="tab-content">
-            <h2 style="font-size: 24px; font-weight: 700; margin-bottom: 20px;">Methodology</h2>
-            
-            <div class="methodology-section">
-                <h3>Overview</h3>
-                <p>This calculator estimates the return on investment for deploying autonomous drones to provide early intelligence to road crews and first responders during disabled vehicle incidents on high-volume roadways.</p>
-            </div>
-            
-            <div class="methodology-section">
-                <h3>Core Formula</h3>
-                <div class="formula">ROI = (Annual Savings - Annual Drone Costs) / Annual Drone Costs 
+<script>
+/* Robust tab switching + calculation logic */
+
+/* Utility: try to extract target id from a button's onclick attribute */
+function extractTargetFromOnclick(btn){
+  try{
+    const onclick = btn.getAttribute && btn.getAttribute('onclick');
+    if(!onclick) return null;
+    const m = onclick.match(/switchTab\(\s*['"]([^'"]+)['"]/);
+    return m ? m[1] : null;
+  }catch(e){
+    return null;
+  }
+}
+
+/* switchTab can be called as switchTab('id', event) or switchTab(event) from inline handlers.
+   It always resolves a string id and then activates the matching tab and content. */
+function switchTab(idOrEvent, evt){
+  try{
+    let id = idOrEvent;
+    // if first arg is an Event (or the event object), try to find the id from currentTarget/dataset/onclick
+    if(typeof idOrEvent !== 'string'){
+      const ev = idOrEvent || evt;
+      const btn = (ev && ev.currentTarget) || (ev && ev.target) || null;
+      if(btn){
+        id = btn.dataset && btn.dataset.target ? btn.dataset.target : extractTargetFromOnclick(btn);
+      }
+    }
+    if(!id) return;
+    // prevent default if possible
+    if(evt && typeof evt.preventDefault === 'function') evt.preventDefault();
+
+    // deactivate tabs and contents
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+
+    // activate content
+    const el = document.getElementById(id);
+    if(el) el.classList.add('active');
+
+    // activate matching tab button(s) (prefer data-target)
+    const btnByData = document.querySelector('.tab[data-target="' + id + '"]');
+    if(btnByData) btnByData.classList.add('active');
+    else {
+      // fallback: find tab with onclick referencing that id
+      const btnByOnclick = Array.from(document.querySelectorAll('.tab')).find(b => {
+        const onclick = b.getAttribute && b.getAttribute('onclick');
+        return onclick && onclick.indexOf("switchTab('" + id + "'") !== -1 || onclick && onclick.indexOf('switchTab("' + id + '"') !== -1;
+      });
+      if(btnByOnclick) btnByOnclick.classList.add('active');
+    }
+  }catch(e){
+    console.error('switchTab error:', e);
+  }
+}
+
+/* Calculation logic (defensive) */
+function calculate(){
+  try{
+    const get = id => {
+      const el = document.getElementById(id);
+      if(!el) return 0;
+      const v = Number(el.value);
+      return isNaN(v) ? 0 : v;
+    };
+
+    const ADT = get('adt');
+    const lanesTotal = Math.max(1, get('lanesTotal') || 1);
+    const truckPercent = (get('truckPercent') || 0) / 100;
+    const avgOccupancy = get('avgOccupancy') || 1;
+
+    const annualIncidents = get('annualIncidents');
+    const avgLanesBlocked = Math.max(0.0001, get('avgLanesBlocked') || 1);
+    const baselineClearanceMin = Math.max(1, get('baselineClearanceMin') || 1);
+    const timeSavedMin = get('timeSavedMin');
+
+    const votPassenger = get('votPassenger');
+    const votCommercial = get('votCommercial');
+    const effectivenessMultiplier = Math.max(0, Math.min(1, get('effectivenessMultiplier') || 1));
+
+    const droneEquipmentCost = get('droneEquipmentCost');
+    const dronePersonnelCost = get('dronePersonnelCost');
+    const droneTrainingOverhead = get('droneTrainingOverhead');
+
+    // vehicles affected per hour (simple average)
+    const vehiclesPerHour = (ADT / 24) * (avgLanesBlocked / lanesTotal);
+    const passengerVehiclesPerHour = vehiclesPerHour * (1 - truckPercent);
+    const commercialVehiclesPerHour = vehiclesPerHour * truckPercent;
+
+    const effectiveTimeSavedMin = timeSavedMin * effectivenessMultiplier;
+    const effectiveTimeSavedHr = effectiveTimeSavedMin / 60;
+
+    const passengerDelay = passengerVehiclesPerHour * avgOccupancy * votPassenger * effectiveTimeSavedHr;
+    const commercialDelay = commercialVehiclesPerHour * votCommercial * effectiveTimeSavedHr;
+    const totalDelayPerIncident = passengerDelay + commercialDelay;
+
+    const secondaryCrashProb = get('secondaryCrashProb');
+    const avgSecondaryCost = get('avgSecondaryCost');
+    // scale secondary savings by fraction of clearance time saved
+    const secondaryCostPerIncident = secondaryCrashProb * avgSecondaryCost * (effectiveTimeSavedMin / baselineClearanceMin);
+
+    const annualSavings = (totalDelayPerIncident + secondaryCostPerIncident) * annualIncidents;
+
+    const annualDroneCosts = droneEquipmentCost + dronePersonnelCost + droneTrainingOverhead;
+    const netAnnualBenefit = annualSavings - annualDroneCosts;
+    const roi = annualDroneCosts === 0 ? (netAnnualBenefit > 0 ? Infinity : -Infinity) : (netAnnualBenefit / annualDroneCosts);
+    const paybackYears = annualSavings > 0 ? (annualDroneCosts / annualSavings) : (netAnnualBenefit > 0 ? 0 : Infinity);
+
+    const fmtMoney = v => isFinite(v) ? ('$' + Number(v).toLocaleString(undefined, {maximumFractionDigits:2})) : '-';
+    const fmtMoney0 = v => isFinite(v) ? ('$' + Math.round(v).toLocaleString()) : '-';
+    const fmtPercent = v => isFinite(v) ? (Math.round(v * 100) + '%') : '-';
+
+    const set = (id, txt) => {
+      const e = document.getElementById(id);
+      if(e) e.textContent = txt;
+    };
+
+    set('passengerDelay', fmtMoney(passengerDelay));
+    set('commercialDelay', fmtMoney(commercialDelay));
+    set('totalDelay', fmtMoney(totalDelayPerIncident));
+    set('secondaryCost', fmtMoney(secondaryCostPerIncident));
+    set('responseCost', fmtMoney(0));
+    set('environmentalCost', fmtMoney(0));
+    set('costPerIncident', fmtMoney(totalDelayPerIncident + secondaryCostPerIncident));
+
+    set('annualBaseline', fmtMoney0((totalDelayPerIncident + secondaryCostPerIncident) * annualIncidents));
+    set('annualSavings', fmtMoney0(annualSavings));
+    set('annualDroneCosts', fmtMoney0(annualDroneCosts));
+    set('netBenefit', fmtMoney0(netAnnualBenefit));
+    set('roiValue', isFinite(roi) ? (Math.round(roi * 100) + '%') : (roi === Infinity ? '∞' : '-'));
+    set('netBenefitValue', fmtMoney0(netAnnualBenefit));
+    set('paybackValue', isFinite(paybackYears) ? (paybackYears.toFixed(1) + ' years') : '-');
+
+    set('laneClosureFactor', fmtPercent(avgLanesBlocked / lanesTotal));
+    set('vehiclesAffected', Math.round(vehiclesPerHour));
+    set('reductionFactor', fmtPercent(effectivenessMultiplier));
+    set('baselineCost', fmtMoney(totalDelayPerIncident + secondaryCostPerIncident));
+    set('savingsPerIncident', fmtMoney(totalDelayPerIncident + secondaryCostPerIncident));
+    set('costReduction', fmtPercent(effectivenessMultiplier));
+
+    const breakEvenIncidents = annualDroneCosts === 0 ? 0 : Math.ceil(annualDroneCosts / Math.max(1, (totalDelayPerIncident + secondaryCostPerIncident)));
+    set('breakEvenIncidents', breakEvenIncidents);
+    set('annualIncidentsDisplay', annualIncidents);
+    const margin = annualIncidents === 0 ? 0 : Math.max(0, ((annualIncidents - breakEvenIncidents) / Math.max(1, annualIncidents)));
+    set('marginSafety', fmtPercent(margin));
+
+  }catch(e){
+    console.error('calculate() error:', e);
+  }
+}
+
+/* Initialization: set data-targets, attach listeners, and run initial calculate */
+document.addEventListener('DOMContentLoaded', function(){
+  try{
+    // Attach click handlers to tabs and set dataset.target for reliability
+    document.querySelectorAll('.tab').forEach(btn => {
+      // prefer explicit data-target if present
+      let target = btn.dataset && btn.dataset.target ? btn.dataset.target : null;
+      if(!target) target = extractTargetFromOnclick(btn);
+
+      // fallback using button text
+      if(!target){
+        const txt = (btn.textContent || '').trim().toLowerCase();
+        if(txt.startsWith('calculator')) target = 'calculator';
+        else if(txt.startsWith('results')) target = 'results';
+        else if(txt.includes('dictionary') || txt.includes('data')) target = 'dictionary';
+        else if(txt.startsWith('methodology')) target = 'methodology';
+      }
+
+      if(target) btn.dataset.target = target;
+
+      // prevent double-calls if inline onclick exists; rely on our handler
+      btn.addEventListener('click', function(e){
+        e.preventDefault();
+        const tgt = btn.dataset.target;
+        if(tgt) switchTab(tgt);
+        else {
+          // last resort: call switchTab with event object (function handles it)
+          switchTab(e);
+        }
+      });
+    });
+
+    // Hook inputs to recalc on change for responsiveness
+    document.querySelectorAll('input').forEach(i => {
+      i.addEventListener('input', calculate);
+    });
+
+    // Initial calculation
+    calculate();
+
+    // Ensure initial active tab state is consistent (in case HTML had active class)
+    const activeContent = document.querySelector('.tab-content.active');
+    if(activeContent){
+      const id = activeContent.id;
+      // mark matching tab active
+      const btn = document.querySelector('.tab[data-target="' + id + '"]') || document.querySelector('.tab[onclick*="switchTab(\'' + id + '\'"]') || null;
+      if(btn) btn.classList.add('active');
+    } else {
+      // default to calculator
+      switchTab('calculator');
+    }
+
+  }catch(e){
+    console.error('Initialization error:', e);
+  }
+});
+</script>
