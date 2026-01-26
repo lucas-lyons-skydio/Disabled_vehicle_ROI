@@ -441,8 +441,8 @@
             <div class="methodology-section">
                 <h3>Notes</h3>
                 <ul>
-                    <li>Delay cost per incident is driven by vehicles affected per hour, time saved, and value of time.</li>
-                    <li>Secondary incident savings scale with the fraction of clearance time saved.</li>
+                    <li>Delay cost per incident is driven by lane closure factor, time saved, and the economic cost of delay per minute.</li>
+                    <li>Secondary incident savings scale with the fraction of clearance time saved and the effectiveness multiplier.</li>
                     <li>Environmental and response costs are displayed but can be refined further depending on your model assumptions.</li>
                 </ul>
             </div>
@@ -489,8 +489,7 @@
                 const baselineClearanceMin = Math.max(1, getNum('baselineClearanceMin', 1));
                 const timeSavedMin = Math.max(0, getNum('timeSavedMin', 0));
 
-                const votPassenger = Math.max(0, getNum('votPassenger', 0));
-                const votCommercial = Math.max(0, getNum('votCommercial', 0));
+                const delayCostPerMin = 350;
 
                 const secondaryCrashProb = Math.max(0, getNum('secondaryCrashProb', 0));
                 const avgSecondaryCost = Math.max(0, getNum('avgSecondaryCost', 0));
@@ -510,35 +509,31 @@
 
                 const effectivenessMultiplier = Math.max(0, Math.min(1, getNum('effectivenessMultiplier', 1)));
 
-                // Core calculations (matches your earlier intent, but defensive)
-                const vehiclesPerHour = (ADT / 24) * (avgLanesBlocked / lanesTotal);
-                const passengerVehiclesPerHour = vehiclesPerHour * (1 - truckPercent);
-                const commercialVehiclesPerHour = vehiclesPerHour * truckPercent;
+                // Core intermediate values
+                const laneClosureFactor = Math.min(1, Math.max(0, (avgLanesBlocked / lanesTotal)));
+                const vehiclesPerHour = ADT / 24;
+                const vehiclesAffectedPerHour = vehiclesPerHour * laneClosureFactor;
 
-                const effectiveTimeSavedMin = timeSavedMin * effectivenessMultiplier;
-                const effectiveTimeSavedHr = effectiveTimeSavedMin / 60;
+                const baselineDurationHours = baselineClearanceMin / 60;
+                const effectiveTimeSavedMin = Math.max(0, Math.min(timeSavedMin, baselineClearanceMin));
+                const reductionFactor = Math.min(1, Math.max(0, (effectiveTimeSavedMin / baselineClearanceMin) * effectivenessMultiplier));
 
-                const passengerDelay = passengerVehiclesPerHour * avgOccupancy * votPassenger * effectiveTimeSavedHr;
-                const commercialDelay = commercialVehiclesPerHour * votCommercial * effectiveTimeSavedHr;
-                const totalDelayPerIncident = passengerDelay + commercialDelay;
+                // Per-incident baseline costs
+                const totalDelayCost = delayCostPerMin * baselineClearanceMin * laneClosureFactor;
+                const secondaryCost = secondaryCrashProb * avgSecondaryCost;
 
-                // Secondary incident savings: scaled by fraction of clearance time saved
-                const secondaryCostPerIncident =
-                    secondaryCrashProb * avgSecondaryCost * (effectiveTimeSavedMin / baselineClearanceMin);
+                const totalResponseMinutes = baselineDetectionMin + baselineVerificationMin + baselineDispatchMin + baselineClearanceMin;
+                const responseHours = totalResponseMinutes / 60;
+                const responseCost = responseHours * responseHourlyCost;
 
-                // Environmental cost (simple): vehicles affected * emission $/veh-hr * time saved (hr)
-                const environmentalCostPerIncident =
-                    vehiclesPerHour * emissionCostPerVehHr * effectiveTimeSavedHr;
+                const environmentalCost = vehiclesAffectedPerHour * baselineDurationHours * emissionCostPerVehHr;
 
-                // Response cost (kept simple / conservative; set to 0 unless you want to model it)
-                // If you want a naive model: responseHourlyCost * (effectiveTimeSavedHr) could represent cost avoided.
-                // Here we display 0 to avoid implying a specific operational model.
-                const responseCostPerIncident = 0;
+                const costPerIncident = totalDelayCost + secondaryCost + responseCost + environmentalCost;
 
-                const costPerIncident =
-                    totalDelayPerIncident + secondaryCostPerIncident + environmentalCostPerIncident + responseCostPerIncident;
-
-                const annualSavings = costPerIncident * annualIncidents;
+                // Savings with drone program
+                const savingsPerIncident = costPerIncident * reductionFactor;
+                const annualBaselineCost = costPerIncident * annualIncidents;
+                const annualSavings = savingsPerIncident * annualIncidents;
 
                 const annualDroneCosts = droneEquipmentCost + dronePersonnelCost + droneTrainingOverhead;
                 const netAnnualBenefit = annualSavings - annualDroneCosts;
@@ -559,16 +554,14 @@
                 };
 
                 // Results: per-incident
-                setText('passengerDelay', fmtMoney(passengerDelay));
-                setText('commercialDelay', fmtMoney(commercialDelay));
-                setText('totalDelay', fmtMoney(totalDelayPerIncident));
-                setText('secondaryCost', fmtMoney(secondaryCostPerIncident));
-                setText('responseCost', fmtMoney(responseCostPerIncident));
-                setText('environmentalCost', fmtMoney(environmentalCostPerIncident));
+                setText('totalDelay', fmtMoney(totalDelayCost));
+                setText('secondaryCost', fmtMoney(secondaryCost));
+                setText('responseCost', fmtMoney(responseCost));
+                setText('environmentalCost', fmtMoney(environmentalCost));
                 setText('costPerIncident', fmtMoney(costPerIncident));
 
                 // Annual
-                setText('annualBaseline', fmtMoney0(costPerIncident * annualIncidents));
+                setText('annualBaseline', fmtMoney0(annualBaselineCost));
                 setText('annualSavings', fmtMoney0(annualSavings));
                 setText('annualDroneCosts', fmtMoney0(annualDroneCosts));
                 setText('netBenefit', fmtMoney0(netAnnualBenefit));
@@ -588,18 +581,18 @@
                 }
 
                 // Operational metrics
-                setText('laneClosureFactor', fmtPercent0(lanesTotal === 0 ? 0 : (avgLanesBlocked / lanesTotal)));
-                setText('vehiclesAffected', Number.isFinite(vehiclesPerHour) ? Math.round(vehiclesPerHour).toString() : '0');
-                setText('reductionFactor', fmtPercent0(effectivenessMultiplier));
+                setText('laneClosureFactor', fmtPercent0(laneClosureFactor));
+                setText('vehiclesAffected', Number.isFinite(vehiclesAffectedPerHour) ? Math.round(vehiclesAffectedPerHour).toLocaleString() : '0');
+                setText('reductionFactor', fmtPercent0(reductionFactor));
 
                 // Per incident impact boxes
                 setText('baselineCost', fmtMoney(costPerIncident));
-                setText('savingsPerIncident', fmtMoney(costPerIncident));
-                setText('costReduction', fmtPercent0(effectivenessMultiplier));
+                setText('savingsPerIncident', fmtMoney(savingsPerIncident));
+                setText('costReduction', fmtPercent0(reductionFactor));
 
                 // Break-even / margin
-                const breakEvenIncidents = (costPerIncident > 0) ? Math.ceil(annualDroneCosts / costPerIncident) : 0;
-                setText('breakEvenIncidents', breakEvenIncidents.toString());
+                const breakEvenIncidents = (savingsPerIncident > 0) ? Math.ceil(annualDroneCosts / savingsPerIncident) : 0;
+                setText('breakEvenIncidents', breakEvenIncidents ? breakEvenIncidents.toLocaleString() : 'N/A');
                 setText('annualIncidentsDisplay', annualIncidents.toString());
 
                 const margin = annualIncidents > 0
