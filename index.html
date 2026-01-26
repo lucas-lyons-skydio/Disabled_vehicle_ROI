@@ -144,17 +144,10 @@
                 <h3 class="section-title">Economic Values</h3>
                 <div class="input-grid">
                     <div class="input-field">
-                        <label>Value of Time - Passenger</label>
+                        <label>Economic Cost of Delay <a href="https://ops.fhwa.dot.gov/tim/docs/EDC-6_Factsheet_TIM_UnmannedAircraft_v2_508.pdf" target="_blank" rel="noopener noreferrer" style="font-size: 12px; font-weight: 600; color: #2563eb; text-decoration: none;">[FHWA UAS TIM]</a></label>
                         <div class="input-wrapper">
-                            <input type="number" id="votPassenger" value="19.50" step="0.50" oninput="calculate()">
-                            <span class="unit">$/hour</span>
-                        </div>
-                    </div>
-                    <div class="input-field">
-                        <label>Value of Time - Commercial</label>
-                        <div class="input-wrapper">
-                            <input type="number" id="votCommercial" value="62" oninput="calculate()">
-                            <span class="unit">$/hour</span>
+                            <input type="text" id="delayCostPerMin" value="$350" disabled>
+                            <span class="unit">$/minute</span>
                         </div>
                     </div>
                     <div class="input-field">
@@ -276,14 +269,6 @@
             <div class="results-grid">
                 <div class="result-card">
                     <h3>Cost Breakdown per Incident</h3>
-                    <div class="result-row">
-                        <span class="result-label">Passenger Vehicle Delay</span>
-                        <span class="result-value" id="passengerDelay">$0</span>
-                    </div>
-                    <div class="result-row">
-                        <span class="result-label">Commercial Vehicle Delay</span>
-                        <span class="result-value" id="commercialDelay">$0</span>
-                    </div>
                     <div class="result-row">
                         <span class="result-label">Total Delay Cost</span>
                         <span class="result-value" id="totalDelay">$0</span>
@@ -429,18 +414,11 @@
                         <td colspan="5">Economic Values</td>
                     </tr>
                     <tr>
-                        <td><strong>VOT Passenger</strong></td>
-                        <td>Economic value of time for passengers</td>
-                        <td>$/hour</td>
-                        <td>$17 - $25</td>
-                        <td>USDOT guidance</td>
-                    </tr>
-                    <tr>
-                        <td><strong>VOT Commercial</strong></td>
-                        <td>Economic value of time for commercial vehicles</td>
-                        <td>$/hour</td>
-                        <td>$50 - $80</td>
-                        <td>ATRI operational costs</td>
+                        <td><strong>Economic Cost of Delay</strong></td>
+                        <td>Estimated fiscal impact of road closures (fixed)</td>
+                        <td>$/minute</td>
+                        <td>$350</td>
+                        <td><a href="https://ops.fhwa.dot.gov/tim/docs/EDC-6_Factsheet_TIM_UnmannedAircraft_v2_508.pdf" target="_blank" rel="noopener noreferrer">Unmanned Aircraft Systems FOR TRAFFIC INCIDENT MANAGEMENT</a></td>
                     </tr>
                 </tbody>
             </table>
