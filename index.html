@@ -141,6 +141,143 @@
             </div>
 
             <div class="input-section">
+                <h3 class="section-title">Incident Mix (Annual) & Type Assumptions</h3>
+                <div class="input-grid">
+                    <div class="input-field">
+                        <label>Single Truck Crashes</label>
+                        <div class="input-wrapper">
+                            <input type="number" id="countSingleTruck" value="125" oninput="calculate()">
+                            <span class="unit">incidents/year</span>
+                        </div>
+                    </div>
+                    <div class="input-field">
+                        <label>Single Truck: Lanes Blocked</label>
+                        <div class="input-wrapper">
+                            <input type="number" id="lanesSingleTruck" value="1" oninput="calculate()">
+                            <span class="unit">lanes</span>
+                        </div>
+                    </div>
+                    <div class="input-field">
+                        <label>Single Truck: Clearance Time <a href="https://ops.fhwa.dot.gov/fastact/atcmtd/ATCMTD_I270_Predictive_Layered_Operations_Initiatives.pdf" target="_blank" rel="noopener noreferrer" style="font-size: 12px; font-weight: 600; color: #2563eb; text-decoration: none;">[FHWA I-270]</a></label>
+                        <div class="input-wrapper">
+                            <input type="number" id="clearSingleTruck" value="48" oninput="calculate()">
+                            <span class="unit">minutes</span>
+                        </div>
+                    </div>
+
+                    <div class="input-field">
+                        <label>Car vs. Deer</label>
+                        <div class="input-wrapper">
+                            <input type="number" id="countCarDeer" value="175" oninput="calculate()">
+                            <span class="unit">incidents/year</span>
+                        </div>
+                    </div>
+                    <div class="input-field">
+                        <label>Car vs. Deer: Lanes Blocked</label>
+                        <div class="input-wrapper">
+                            <input type="number" id="lanesCarDeer" value="1" oninput="calculate()">
+                            <span class="unit">lanes</span>
+                        </div>
+                    </div>
+                    <div class="input-field">
+                        <label>Car vs. Deer: Clearance Time <a href="https://ops.fhwa.dot.gov/fastact/atcmtd/ATCMTD_I270_Predictive_Layered_Operations_Initiatives.pdf" target="_blank" rel="noopener noreferrer" style="font-size: 12px; font-weight: 600; color: #2563eb; text-decoration: none;">[FHWA I-270]</a></label>
+                        <div class="input-wrapper">
+                            <input type="number" id="clearCarDeer" value="48" oninput="calculate()">
+                            <span class="unit">minutes</span>
+                        </div>
+                    </div>
+
+                    <div class="input-field">
+                        <label>Single Car Crash</label>
+                        <div class="input-wrapper">
+                            <input type="number" id="countSingleCar" value="357" oninput="calculate()">
+                            <span class="unit">incidents/year</span>
+                        </div>
+                    </div>
+                    <div class="input-field">
+                        <label>Single Car: Lanes Blocked</label>
+                        <div class="input-wrapper">
+                            <input type="number" id="lanesSingleCar" value="1" oninput="calculate()">
+                            <span class="unit">lanes</span>
+                        </div>
+                    </div>
+                    <div class="input-field">
+                        <label>Single Car: Clearance Time <a href="https://ops.fhwa.dot.gov/fastact/atcmtd/ATCMTD_I270_Predictive_Layered_Operations_Initiatives.pdf" target="_blank" rel="noopener noreferrer" style="font-size: 12px; font-weight: 600; color: #2563eb; text-decoration: none;">[FHWA I-270]</a></label>
+                        <div class="input-wrapper">
+                            <input type="number" id="clearSingleCar" value="48" oninput="calculate()">
+                            <span class="unit">minutes</span>
+                        </div>
+                    </div>
+
+                    <div class="input-field">
+                        <label>Multi-Car Crash</label>
+                        <div class="input-wrapper">
+                            <input type="number" id="countMultiCar" value="1084" oninput="calculate()">
+                            <span class="unit">incidents/year</span>
+                        </div>
+                    </div>
+                    <div class="input-field">
+                        <label>Multi-Car: Lanes Blocked</label>
+                        <div class="input-wrapper">
+                            <input type="number" id="lanesMultiCar" value="1" oninput="calculate()">
+                            <span class="unit">lanes</span>
+                        </div>
+                    </div>
+                    <div class="input-field">
+                        <label>Multi-Car: Clearance Time <a href="https://ops.fhwa.dot.gov/fastact/atcmtd/ATCMTD_I270_Predictive_Layered_Operations_Initiatives.pdf" target="_blank" rel="noopener noreferrer" style="font-size: 12px; font-weight: 600; color: #2563eb; text-decoration: none;">[FHWA I-270]</a></label>
+                        <div class="input-wrapper">
+                            <input type="number" id="clearMultiCar" value="64" oninput="calculate()">
+                            <span class="unit">minutes</span>
+                        </div>
+                    </div>
+
+                    <div class="input-field">
+                        <label>Multi-Truck Crash</label>
+                        <div class="input-wrapper">
+                            <input type="number" id="countMultiTruck" value="623" oninput="calculate()">
+                            <span class="unit">incidents/year</span>
+                        </div>
+                    </div>
+                    <div class="input-field">
+                        <label>Multi-Truck: Lanes Blocked</label>
+                        <div class="input-wrapper">
+                            <input type="number" id="lanesMultiTruck" value="1" oninput="calculate()">
+                            <span class="unit">lanes</span>
+                        </div>
+                    </div>
+                    <div class="input-field">
+                        <label>Multi-Truck: Clearance Time <a href="https://ops.fhwa.dot.gov/fastact/atcmtd/ATCMTD_I270_Predictive_Layered_Operations_Initiatives.pdf" target="_blank" rel="noopener noreferrer" style="font-size: 12px; font-weight: 600; color: #2563eb; text-decoration: none;">[FHWA I-270]</a></label>
+                        <div class="input-wrapper">
+                            <input type="number" id="clearMultiTruck" value="64" oninput="calculate()">
+                            <span class="unit">minutes</span>
+                        </div>
+                    </div>
+
+                    <div class="input-field">
+                        <label>Multi-Vehicle (Mixed) Crash</label>
+                        <div class="input-wrapper">
+                            <input type="number" id="countMultiMixed" value="1383" oninput="calculate()">
+                            <span class="unit">incidents/year</span>
+                        </div>
+                    </div>
+                    <div class="input-field">
+                        <label>Multi-Vehicle (Mixed): Lanes Blocked</label>
+                        <div class="input-wrapper">
+                            <input type="number" id="lanesMultiMixed" value="1" oninput="calculate()">
+                            <span class="unit">lanes</span>
+                        </div>
+                    </div>
+                    <div class="input-field">
+                        <label>Multi-Vehicle (Mixed): Clearance Time <a href="https://ops.fhwa.dot.gov/fastact/atcmtd/ATCMTD_I270_Predictive_Layered_Operations_Initiatives.pdf" target="_blank" rel="noopener noreferrer" style="font-size: 12px; font-weight: 600; color: #2563eb; text-decoration: none;">[FHWA I-270]</a></label>
+                        <div class="input-wrapper">
+                            <input type="number" id="clearMultiMixed" value="64" oninput="calculate()">
+                            <span class="unit">minutes</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="input-section">
                 <h3 class="section-title">Economic Values</h3>
                 <div class="input-grid">
                     <div class="input-field">
@@ -309,6 +446,53 @@
                         <span class="result-label" style="font-weight: 700;">Net Annual Benefit</span>
                         <span class="result-value" id="netBenefit">$0</span>
                     </div>
+
+                    <table style="margin-top: 16px;">
+                        <thead>
+                            <tr>
+                                <th>Incident Type</th>
+                                <th>Annual Baseline</th>
+                                <th>Annual Savings</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Single Truck</td>
+                                <td id="annualBaselineSingleTruck">$0</td>
+                                <td id="annualSavingsSingleTruck">$0</td>
+                            </tr>
+                            <tr>
+                                <td>Car vs. Deer</td>
+                                <td id="annualBaselineCarDeer">$0</td>
+                                <td id="annualSavingsCarDeer">$0</td>
+                            </tr>
+                            <tr>
+                                <td>Single Car</td>
+                                <td id="annualBaselineSingleCar">$0</td>
+                                <td id="annualSavingsSingleCar">$0</td>
+                            </tr>
+                            <tr>
+                                <td>Multi-Car</td>
+                                <td id="annualBaselineMultiCar">$0</td>
+                                <td id="annualSavingsMultiCar">$0</td>
+                            </tr>
+                            <tr>
+                                <td>Multi-Truck</td>
+                                <td id="annualBaselineMultiTruck">$0</td>
+                                <td id="annualSavingsMultiTruck">$0</td>
+                            </tr>
+                            <tr>
+                                <td>Multi-Vehicle (Mixed)</td>
+                                <td id="annualBaselineMultiMixed">$0</td>
+                                <td id="annualSavingsMultiMixed">$0</td>
+                            </tr>
+                            <tr>
+                                <td>Other / Unspecified</td>
+                                <td id="annualBaselineOther">$0</td>
+                                <td id="annualSavingsOther">$0</td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
 
@@ -509,6 +693,51 @@
 
                 const effectivenessMultiplier = Math.max(0, Math.min(1, getNum('effectivenessMultiplier', 1)));
 
+                const incidentTypes = [
+                    {
+                        key: 'SingleTruck',
+                        label: 'Single Truck',
+                        count: Math.max(0, getNum('countSingleTruck', 0)),
+                        lanesBlocked: Math.max(0, getNum('lanesSingleTruck', avgLanesBlocked)),
+                        clearanceMin: Math.max(1, getNum('clearSingleTruck', baselineClearanceMin))
+                    },
+                    {
+                        key: 'CarDeer',
+                        label: 'Car vs. Deer',
+                        count: Math.max(0, getNum('countCarDeer', 0)),
+                        lanesBlocked: Math.max(0, getNum('lanesCarDeer', avgLanesBlocked)),
+                        clearanceMin: Math.max(1, getNum('clearCarDeer', baselineClearanceMin))
+                    },
+                    {
+                        key: 'SingleCar',
+                        label: 'Single Car',
+                        count: Math.max(0, getNum('countSingleCar', 0)),
+                        lanesBlocked: Math.max(0, getNum('lanesSingleCar', avgLanesBlocked)),
+                        clearanceMin: Math.max(1, getNum('clearSingleCar', baselineClearanceMin))
+                    },
+                    {
+                        key: 'MultiCar',
+                        label: 'Multi-Car',
+                        count: Math.max(0, getNum('countMultiCar', 0)),
+                        lanesBlocked: Math.max(0, getNum('lanesMultiCar', avgLanesBlocked)),
+                        clearanceMin: Math.max(1, getNum('clearMultiCar', baselineClearanceMin))
+                    },
+                    {
+                        key: 'MultiTruck',
+                        label: 'Multi-Truck',
+                        count: Math.max(0, getNum('countMultiTruck', 0)),
+                        lanesBlocked: Math.max(0, getNum('lanesMultiTruck', avgLanesBlocked)),
+                        clearanceMin: Math.max(1, getNum('clearMultiTruck', baselineClearanceMin))
+                    },
+                    {
+                        key: 'MultiMixed',
+                        label: 'Multi-Vehicle (Mixed)',
+                        count: Math.max(0, getNum('countMultiMixed', 0)),
+                        lanesBlocked: Math.max(0, getNum('lanesMultiMixed', avgLanesBlocked)),
+                        clearanceMin: Math.max(1, getNum('clearMultiMixed', baselineClearanceMin))
+                    }
+                ];
+
                 // Core intermediate values
                 const laneClosureFactor = Math.min(1, Math.max(0, (avgLanesBlocked / lanesTotal)));
                 const vehiclesPerHour = ADT / 24;
@@ -532,8 +761,49 @@
 
                 // Savings with drone program
                 const savingsPerIncident = costPerIncident * reductionFactor;
-                const annualBaselineCost = costPerIncident * annualIncidents;
-                const annualSavings = savingsPerIncident * annualIncidents;
+                const annualBaselineCostTotalInput = costPerIncident * annualIncidents;
+                const annualSavingsTotalInput = savingsPerIncident * annualIncidents;
+
+                const typedCountTotal = incidentTypes.reduce((sum, t) => sum + t.count, 0);
+                const otherCount = Math.max(0, annualIncidents - typedCountTotal);
+
+                const perType = {};
+                let annualBaselineFromTypes = 0;
+                let annualSavingsFromTypes = 0;
+
+                incidentTypes.forEach(t => {
+                    const laneClosureFactorT = Math.min(1, Math.max(0, (t.lanesBlocked / lanesTotal)));
+                    const baselineDurationHoursT = t.clearanceMin / 60;
+                    const vehiclesAffectedPerHourT = vehiclesPerHour * laneClosureFactorT;
+
+                    const effectiveTimeSavedMinT = Math.max(0, Math.min(timeSavedMin, t.clearanceMin));
+                    const reductionFactorT = Math.min(1, Math.max(0, (effectiveTimeSavedMinT / t.clearanceMin) * effectivenessMultiplier));
+
+                    const totalDelayCostT = delayCostPerMin * t.clearanceMin * laneClosureFactorT;
+                    const secondaryCostT = secondaryCrashProb * avgSecondaryCost;
+
+                    const totalResponseMinutesT = baselineDetectionMin + baselineVerificationMin + baselineDispatchMin + t.clearanceMin;
+                    const responseHoursT = totalResponseMinutesT / 60;
+                    const responseCostT = responseHoursT * responseHourlyCost;
+
+                    const environmentalCostT = vehiclesAffectedPerHourT * baselineDurationHoursT * emissionCostPerVehHr;
+
+                    const costPerIncidentT = totalDelayCostT + secondaryCostT + responseCostT + environmentalCostT;
+                    const savingsPerIncidentT = costPerIncidentT * reductionFactorT;
+
+                    const annualBaselineT = costPerIncidentT * t.count;
+                    const annualSavingsT = savingsPerIncidentT * t.count;
+
+                    perType[t.key] = { annualBaselineT, annualSavingsT };
+                    annualBaselineFromTypes += annualBaselineT;
+                    annualSavingsFromTypes += annualSavingsT;
+                });
+
+                const annualBaselineOther = costPerIncident * otherCount;
+                const annualSavingsOther = savingsPerIncident * otherCount;
+
+                const annualBaselineCost = typedCountTotal > 0 ? (annualBaselineFromTypes + annualBaselineOther) : annualBaselineCostTotalInput;
+                const annualSavings = typedCountTotal > 0 ? (annualSavingsFromTypes + annualSavingsOther) : annualSavingsTotalInput;
 
                 const annualDroneCosts = droneEquipmentCost + dronePersonnelCost + droneTrainingOverhead;
                 const netAnnualBenefit = annualSavings - annualDroneCosts;
@@ -566,6 +836,38 @@
                 setText('annualDroneCosts', fmtMoney0(annualDroneCosts));
                 setText('netBenefit', fmtMoney0(netAnnualBenefit));
                 setText('netBenefitValue', fmtMoney0(netAnnualBenefit));
+
+                if (typedCountTotal > 0) {
+                    setText('annualBaselineSingleTruck', fmtMoney0(perType.SingleTruck ? perType.SingleTruck.annualBaselineT : 0));
+                    setText('annualSavingsSingleTruck', fmtMoney0(perType.SingleTruck ? perType.SingleTruck.annualSavingsT : 0));
+                    setText('annualBaselineCarDeer', fmtMoney0(perType.CarDeer ? perType.CarDeer.annualBaselineT : 0));
+                    setText('annualSavingsCarDeer', fmtMoney0(perType.CarDeer ? perType.CarDeer.annualSavingsT : 0));
+                    setText('annualBaselineSingleCar', fmtMoney0(perType.SingleCar ? perType.SingleCar.annualBaselineT : 0));
+                    setText('annualSavingsSingleCar', fmtMoney0(perType.SingleCar ? perType.SingleCar.annualSavingsT : 0));
+                    setText('annualBaselineMultiCar', fmtMoney0(perType.MultiCar ? perType.MultiCar.annualBaselineT : 0));
+                    setText('annualSavingsMultiCar', fmtMoney0(perType.MultiCar ? perType.MultiCar.annualSavingsT : 0));
+                    setText('annualBaselineMultiTruck', fmtMoney0(perType.MultiTruck ? perType.MultiTruck.annualBaselineT : 0));
+                    setText('annualSavingsMultiTruck', fmtMoney0(perType.MultiTruck ? perType.MultiTruck.annualSavingsT : 0));
+                    setText('annualBaselineMultiMixed', fmtMoney0(perType.MultiMixed ? perType.MultiMixed.annualBaselineT : 0));
+                    setText('annualSavingsMultiMixed', fmtMoney0(perType.MultiMixed ? perType.MultiMixed.annualSavingsT : 0));
+                    setText('annualBaselineOther', fmtMoney0(annualBaselineOther));
+                    setText('annualSavingsOther', fmtMoney0(annualSavingsOther));
+                } else {
+                    setText('annualBaselineSingleTruck', '$0');
+                    setText('annualSavingsSingleTruck', '$0');
+                    setText('annualBaselineCarDeer', '$0');
+                    setText('annualSavingsCarDeer', '$0');
+                    setText('annualBaselineSingleCar', '$0');
+                    setText('annualSavingsSingleCar', '$0');
+                    setText('annualBaselineMultiCar', '$0');
+                    setText('annualSavingsMultiCar', '$0');
+                    setText('annualBaselineMultiTruck', '$0');
+                    setText('annualSavingsMultiTruck', '$0');
+                    setText('annualBaselineMultiMixed', '$0');
+                    setText('annualSavingsMultiMixed', '$0');
+                    setText('annualBaselineOther', '$0');
+                    setText('annualSavingsOther', '$0');
+                }
 
                 // Summary widgets
                 const roiEl = document.getElementById('roiValue');
